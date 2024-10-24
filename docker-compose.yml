@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6.0
+    container_name: redis_broker
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # fastapi:
+  #   build: .
+  #   container_name: fastapi_app
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   environment:
+  #     DATABASE_URL: "postgresql://myuser:mypassword@postgres:5432/mydatabase"
+  #     CELERY_BROKER_URL: "redis://redis:6379/0"
+  #     CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+  #   volumes:
+  #     - .:/app
+  #   ports:
+  #     - "8000:8000"
+  #   command: >
+  #     sh -c "alembic upgrade head &&
+  #            uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # celery_worker:
+  #   build: .
+  #   container_name: celery_worker
+  #   restart: always
+  #   depends_on:
+  #     - fastapi
+  #     - redis
+  #   environment:
+  #     CELERY_BROKER_URL: "redis://redis:6379/0"
+  #     CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+  #   volumes:
+  #     - .:/app
+  #   command: celery -A app.celery_worker.celery worker --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:
